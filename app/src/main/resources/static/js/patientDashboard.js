@@ -34,8 +34,7 @@ async function filterDoctorsOnChange() {
   const specialty = filterSpecialty.length > 0 ? filterSpecialty : null;
 
   try {
-    const response = await filterDoctors(name, time, specialty);
-    const doctors = response.doctors || [];
+    const doctors = await filterDoctors(name, time, specialty);
     renderDoctorCards(doctors);
 
     if (doctors.length === 0) {

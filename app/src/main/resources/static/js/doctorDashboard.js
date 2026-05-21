@@ -1,10 +1,10 @@
 import { createPatientRow } from "./components/patientRows.js";
 import { getAllAppointments } from "./services/appointmentRecordService.js";
 
-const tableBody = document.getElementById("patientTableBody");
-const searchBar = document.getElementById("searchBar");
-const todayButton = document.getElementById("todayButton");
-const datePicker = document.getElementById("datePicker");
+let tableBody;
+let searchBar;
+let todayButton;
+let datePicker;
 
 let selectedDate = new Date().toISOString().slice(0, 10);
 let patientName = "null";
@@ -30,7 +30,7 @@ async function loadAppointments() {
     tableBody.innerHTML = "";
 
     if (appointments.length === 0) {
-      renderEmptyRow("No appointments found for the selected date.");
+      renderEmptyRow("No Appointments found for today");
       return;
     }
 
@@ -50,24 +50,30 @@ async function loadAppointments() {
   }
 }
 
-searchBar?.addEventListener("input", () => {
-  const value = searchBar.value.trim();
-  patientName = value.length > 0 ? value : "null";
-  loadAppointments();
-});
-
-todayButton?.addEventListener("click", () => {
-  selectedDate = new Date().toISOString().slice(0, 10);
-  if (datePicker) datePicker.value = selectedDate;
-  loadAppointments();
-});
-
-datePicker?.addEventListener("change", () => {
-  selectedDate = datePicker.value || new Date().toISOString().slice(0, 10);
-  loadAppointments();
-});
-
 document.addEventListener("DOMContentLoaded", () => {
+  tableBody = document.getElementById("patientTableBody");
+  searchBar = document.getElementById("searchBar");
+  todayButton = document.getElementById("todayButton");
+  datePicker = document.getElementById("datePicker");
+
+  searchBar?.addEventListener("input", () => {
+    const value = searchBar.value.trim();
+    patientName = value.length > 0 ? value : "null";
+    loadAppointments();
+  });
+
+  todayButton?.addEventListener("click", () => {
+    selectedDate = new Date().toISOString().slice(0, 10);
+    if (datePicker) datePicker.value = selectedDate;
+    loadAppointments();
+  });
+
+  datePicker?.addEventListener("change", () => {
+    selectedDate = datePicker.value || new Date().toISOString().slice(0, 10);
+    loadAppointments();
+  });
+
   if (datePicker) datePicker.value = selectedDate;
+  if (typeof renderContent === "function") renderContent();
   loadAppointments();
 });

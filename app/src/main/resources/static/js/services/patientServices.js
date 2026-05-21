@@ -1,49 +1,47 @@
-// patientServices
 import { API_BASE_URL } from "../config/config.js";
-const PATIENT_API = API_BASE_URL + '/patient'
 
+const PATIENT_API = API_BASE_URL + "/patient";
 
-//For creating a patient in db
 export async function patientSignup(data) {
   try {
-    const response = await fetch(`${PATIENT_API}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json"
-        },
-        body: JSON.stringify(data)
-      }
-    );
+    // Create a patient account from the signup form details.
+    const response = await fetch(PATIENT_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
     const result = await response.json();
     if (!response.ok) {
       throw new Error(result.message);
     }
-    return { success: response.ok, message: result.message }
-  }
-  catch (error) {
-    console.error("Error :: patientSignup :: ", error)
-    return { success: false, message: error.message }
+    return { success: true, message: result.message };
+  } catch (error) {
+    console.error("Error :: patientSignup :: ", error);
+    return { success: false, message: error.message || "Unable to sign up patient." };
   }
 }
 
-//For logging in patient
 export async function patientLogin(data) {
-  console.log("patientLogin :: ", data)
-  return await fetch(`${PATIENT_API}/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(data)
-  });
-
-
+  try {
+    // Authenticate a patient and return the raw response for token handling.
+    return await fetch(`${PATIENT_API}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+  } catch (error) {
+    console.error("Error :: patientLogin :: ", error);
+    return new Response(null, { status: 500, statusText: "Patient login failed" });
+  }
 }
 
-// For getting patient data (name ,id , etc ). Used in booking appointments
 export async function getPatientData(token) {
   try {
+    // Load the logged-in patient's details for profile and booking flows.
     const response = await fetch(`${PATIENT_API}/${token}`);
     const data = await response.json();
     if (response.ok) return data.patient;
@@ -54,18 +52,16 @@ export async function getPatientData(token) {
   }
 }
 
-// the Backend API for fetching the patient record(visible in Doctor Dashboard) and Appointments (visible in Patient Dashboard) are same based on user(patient/doctor).
 export async function getPatientAppointments(id, token, user) {
   try {
+    // Fetch appointments using the shared patient/doctor dashboard endpoint.
     const response = await fetch(`${PATIENT_API}/${id}/${user}/${token}`);
     const data = await response.json();
-    console.log(data.appointments)
     if (response.ok) {
       return data.appointments;
     }
     return null;
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Error fetching patient details:", error);
     return null;
   }
@@ -73,6 +69,7 @@ export async function getPatientAppointments(id, token, user) {
 
 export async function filterAppointments(condition, name, token) {
   try {
+    // Fetch appointments that match the current status/search filters.
     const response = await fetch(`${PATIENT_API}/filter/${condition}/${name}/${token}`, {
       method: "GET",
       headers: {
@@ -82,16 +79,14 @@ export async function filterAppointments(condition, name, token) {
 
     if (response.ok) {
       const data = await response.json();
-      return data;
-
+      return data.appointments || [];
     } else {
-      console.error("Failed to fetch doctors:", response.statusText);
-      return { appointments: [] };
-
+      console.error("Failed to fetch appointments:", response.statusText);
+      return [];
     }
   } catch (error) {
     console.error("Error:", error);
     alert("Something went wrong!");
-    return { appointments: [] };
+    return [];
   }
 }

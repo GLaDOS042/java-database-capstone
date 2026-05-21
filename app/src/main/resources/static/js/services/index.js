@@ -1,12 +1,12 @@
 import { API_BASE_URL } from "../config/config.js";
 import { openModal } from "../components/modals.js";
 
-const ADMIN_API = `${API_BASE_URL}/admin`;
-const DOCTOR_API = `${API_BASE_URL}/doctor/login`;
+const ADMIN_API = API_BASE_URL + "/admin";
+const DOCTOR_API = API_BASE_URL + "/doctor/login";
 
 window.openModal = openModal;
 
-window.addEventListener("DOMContentLoaded", () => {
+window.onload = function () {
   const adminLogin = document.getElementById("adminLogin");
   const doctorLogin = document.getElementById("doctorLogin");
 
@@ -17,7 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (doctorLogin) {
     doctorLogin.addEventListener("click", () => openModal("doctorLogin"));
   }
-});
+};
 
 window.adminLoginHandler = async function adminLoginHandler() {
   const username = document.getElementById("username").value.trim();
@@ -38,7 +38,7 @@ window.adminLoginHandler = async function adminLoginHandler() {
       localStorage.setItem("token", result.token);
       selectRole("admin");
     } else {
-      alert("Invalid admin credentials.");
+      alert("Invalid credentials!");
     }
   } catch (error) {
     console.error("Admin login failed:", error);
@@ -65,7 +65,7 @@ window.doctorLoginHandler = async function doctorLoginHandler() {
       localStorage.setItem("token", result.token);
       selectRole("doctor");
     } else {
-      alert("Invalid doctor credentials.");
+      alert("Invalid credentials!");
     }
   } catch (error) {
     console.error("Doctor login failed:", error);

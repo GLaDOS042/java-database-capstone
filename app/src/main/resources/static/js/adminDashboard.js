@@ -7,6 +7,9 @@ window.openModal = openModal;
 document.addEventListener("DOMContentLoaded", () => {
   loadDoctorCards();
 
+  document.getElementById("addDocBtn")?.addEventListener("click", () => {
+    openModal("addDoctor");
+  });
   document.getElementById("searchBar")?.addEventListener("input", filterDoctorsOnChange);
   document.getElementById("filterTime")?.addEventListener("change", filterDoctorsOnChange);
   document.getElementById("filterSpecialty")?.addEventListener("change", filterDoctorsOnChange);
@@ -31,12 +34,11 @@ async function filterDoctorsOnChange() {
   const specialty = filterSpecialty.length > 0 ? filterSpecialty : null;
 
   try {
-    const response = await filterDoctors(name, time, specialty);
-    const doctors = response.doctors || [];
+    const doctors = await filterDoctors(name, time, specialty);
     renderDoctorCards(doctors);
 
     if (doctors.length === 0) {
-      document.getElementById("content").innerHTML = "<p>No doctors found with the given filters.</p>";
+      document.getElementById("content").innerHTML = "<p>No doctors found</p>";
     }
   } catch (error) {
     console.error("Failed to filter doctors:", error);
