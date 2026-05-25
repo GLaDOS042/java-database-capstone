@@ -30,23 +30,19 @@ public class TokenService {
         this.patientRepository = patientRepository;
     }
 
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public String generateToken(String subject) {
+    public String generateToken(String identifier) {
         Date now = new Date();
         Date expiration = new Date(now.getTime() + 7L * 24 * 60 * 60 * 1000);
 
         return Jwts.builder()
-                .subject(subject)
+                .subject(identifier)
                 .issuedAt(now)
                 .expiration(expiration)
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    public String extractIdentifier(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
@@ -55,18 +51,26 @@ public class TokenService {
                 .getSubject();
     }
 
-    public boolean validateToken(String token, String role) {
-        try {
-            String email = extractEmail(token);
+    public String extractEmail(String token) {
+        return extractIdentifier(token);
+    }
 
-            return switch (role.toLowerCase()) {
-                case "admin" -> adminRepository.findByUsername(email) != null;
-                case "doctor" -> doctorRepository.findByEmail(email) != null;
-                case "patient" -> patientRepository.findByEmail(email) != null;
+    public boolean validateToken(String token, String user) {
+        try {
+            String identifier = extractIdentifier(token);
+
+            return switch (user.toLowerCase()) {
+                case "admin" -> adminRepository.findByUsername(identifier) != null;
+                case "doctor" -> doctorRepository.findByEmail(identifier) != null;
+                case "patient" -> patientRepository.findByEmail(identifier) != null;
                 default -> false;
             };
         } catch (Exception exception) {
             return false;
         }
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 }
